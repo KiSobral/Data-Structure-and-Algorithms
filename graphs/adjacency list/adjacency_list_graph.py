@@ -17,3 +17,12 @@ class Graph:
         node = AdjNode(begin)
         node.next = self.graph[dest]
         self.graph[dest] = node
+
+    def print_graph(self):
+        for i in range(self.nodes):
+            print("Adjacency list of node {}\n head".format(i), end="")
+            temp = self.graph[i]
+            while temp:
+                print(" -> {}".format(temp.node), end="")
+                temp = temp.next
+            print(" \n")
