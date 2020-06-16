@@ -1,4 +1,15 @@
 def binary_search(list, item):
+    '''
+        This function searchs within a given list for a given item.
+
+        --- Keyword arguments:
+            - list: A List that contains an arbitrary number of int numbers
+            - item: An Int object that corresponds to the number that must be looked for into the List
+
+        --- Possible returns:
+            - If the item is in list, the function will return the position of the item
+            - If the item is not in list, the function will return None
+    '''
     min = 0
     max = len(list) - 1
 
