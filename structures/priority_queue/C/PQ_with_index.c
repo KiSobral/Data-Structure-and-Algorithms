@@ -7,30 +7,30 @@ Item *data;
 
 typedef struct pq_ist {
     int N;   // Tamanho da fila de prioridade
-    int *pq; // Fila de prioridades, armazena os índices de um conjunto de itens
-    int *qp; // Armazena a posição da heap para o elemento de índice K do conjunto de itens. Algo parecido como uma "hash"
+    int *heap_index; // Fila de prioridades, armazena os índices de um conjunto de itens
+    int *index_to_heap; // Armazena a posição da heap para o elemento de índice K do conjunto de itens. Algo parecido como uma "hash"
 } pq_ist;
 
 int less(pq_ist *PQ, int A, int B){
-    return (data[PQ->pq[A]] < data[PQ->pq[B]]);
+    return (data[PQ->heap_index[A]] < data[PQ->heap_index[B]]);
 }
 
 void exch(pq_ist *PQ, int i, int j){
-    // qp exch
+    // index_to_heap exch
     int t;
-    t         = PQ->qp[i]; 
-    PQ->qp[i] = PQ->qp[j];
-    PQ->qp[j] = t;
+    t         = PQ->index_to_heap[i]; 
+    PQ->index_to_heap[i] = PQ->index_to_heap[j];
+    PQ->index_to_heap[j] = t;
 
     // pq exch
-    PQ->pq[PQ->qp[i]] = i;
-    PQ->pq[PQ->qp[j]] = j;
+    PQ->heap_index[PQ->index_to_heap[i]] = i;
+    PQ->heap_index[PQ->index_to_heap[j]] = j;
 }
 
 // swim -> Bottom-Up Heapify
 void fixUp(pq_ist *PQ, int k){
     while (k>1 && less(PQ, k/2, k)){
-        exch(PQ, PQ->pq[k], PQ->pq[k/2]);
+        exch(PQ, PQ->heap_index[k], PQ->heap_index[k/2]);
         k = k/2;
     }
 }
@@ -45,7 +45,7 @@ void fixDown(pq_ist *PQ, int k){
 
         if (!less(PQ, k, j)) break;
         else {
-            exch(PQ, PQ->pq[k], PQ->pq[j]);
+            exch(PQ, PQ->heap_index[k], PQ->heap_index[j]);
             k=j;
         }
     }
@@ -53,8 +53,8 @@ void fixDown(pq_ist *PQ, int k){
 
 void PQinit(pq_ist *PQ, int MAX){
     PQ->N = 0;
-    PQ->pq = malloc(sizeof(pq_ist) * (MAX+1));
-    PQ->qp = malloc(sizeof(pq_ist) * (MAX+1));
+    PQ->heap_index = malloc(sizeof(pq_ist) * (MAX+1));
+    PQ->index_to_heap = malloc(sizeof(pq_ist) * (MAX+1));
 }
 
 int PQempty(pq_ist *PQ){
@@ -62,21 +62,21 @@ int PQempty(pq_ist *PQ){
 }
 
 void PQinsert(pq_ist *PQ, int k){
-    PQ->qp[k] = ++PQ->N;
-    PQ->pq[PQ->N] = k;
+    PQ->index_to_heap[k] = ++PQ->N;
+    PQ->heap_index[PQ->N] = k;
     fixUp(PQ, PQ->N);
 }
 
 Item PQdelMax(pq_ist *PQ){
-    exch(PQ, PQ->pq[1], PQ->pq[PQ->N]);
+    exch(PQ, PQ->heap_index[1], PQ->heap_index[PQ->N]);
     PQ->N--;
     fixDown(PQ, 1);
-    return data[PQ->pq[PQ->N+1]];
+    return data[PQ->heap_index[PQ->N+1]];
 }
 
 void PQchange(pq_ist *PQ, int k){
-    fixUp(PQ, PQ->qp[k]);
-    fixDown(PQ, PQ->qp[k]);
+    fixUp(PQ, PQ->index_to_heap[k]);
+    fixDown(PQ, PQ->index_to_heap[k]);
 }
 
 int main() {
@@ -86,28 +86,51 @@ int main() {
     pq_ist *PQ = malloc(sizeof(pq_ist));
     PQinit(PQ, 5);
     PQinsert(PQ, 4);
-    PQinsert(PQ, 2);
     PQinsert(PQ, 3);
+    PQinsert(PQ, 2);
+    PQinsert(PQ, 1);
+    PQinsert(PQ, 0);
 
-    printf("-----HEAP COM INDICES DO VETOR DATA-----\n");
-    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->pq[i]);
+    printf("---------FORMATO INICIAL DA HEAP--------\n");
+    printf("--  HASH COM ÍNDICES DA HEAP  --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->heap_index[i]);
     printf("\n");
-    printf("-----ARVORE RESGATADA COM OS INDICES DA HEAP-----\n");
-    for (int i=1; i<=PQ->N; i++) printf("%d ", data[PQ->pq[i]]);
+    printf("-- VALORES RESGATADOS DA HEAP --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", data[PQ->heap_index[i]]);
     printf("\n");
 
-    printf("\n-----MUDANÇA DE PRIORIDADE DE 79 PARA 98-----\n");
-    data[4] = 98;
+    printf("\n-----MUDANÇA DE PRIORIDADE DE 97 PARA 61-----\n");
+    data[3] = 61;
+    PQchange(PQ, 3);
+    printf("--  HASH COM ÍNDICES DA HEAP  --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->heap_index[i]);
+    printf("\n");
+    printf("-- VALORES RESGATADOS DA HEAP --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", data[PQ->heap_index[i]]);
+    printf("\n");
+
+    printf("\n-----MUDANÇA DE PRIORIDADE DE 100 PARA 92-----\n");
+    data[0] = 92;
+    PQchange(PQ, 0);
+    printf("--  HASH COM ÍNDICES DA HEAP  --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->heap_index[i]);
+    printf("\n");
+    printf("-- VALORES RESGATADOS DA HEAP --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", data[PQ->heap_index[i]]);
+    printf("\n");
+
+    printf("\n-----MUDANÇA DE PRIORIDADE DE 79 PARA 91-----\n");
+    data[4] = 91;
     PQchange(PQ, 4);
-    printf("-----HEAP COM INDICES DO VETOR DATA-----\n");
-    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->pq[i]);
+    printf("--  HASH COM ÍNDICES DA HEAP  --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->heap_index[i]);
     printf("\n");
-    printf("-----ARVORE RESGATADA COM OS INDICES DA HEAP-----\n");
-    for (int i=1; i<=PQ->N; i++) printf("%d ", data[PQ->pq[i]]);
-    printf("\n");
+    printf("-- VALORES RESGATADOS DA HEAP --\n");
+    for (int i=1; i<=PQ->N; i++) printf("%d ", data[PQ->heap_index[i]]);
+    printf("\n\n");
 
-    free(PQ->pq);
-    free(PQ->qp);
+    free(PQ->heap_index);
+    free(PQ->index_to_heap);
     free(PQ);
     return 0;
 }
