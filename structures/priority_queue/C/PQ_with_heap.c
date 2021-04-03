@@ -54,3 +54,25 @@ Item PQdelMax(pq_st *PQ){
     fixDown(PQ->pq, 1, --PQ->N);
     return PQ->pq[PQ->N+1];
 }
+
+int main(){
+    pq_st *PQ;
+
+    PQ = malloc(sizeof(pq_st));
+    PQinit(12, PQ);
+    PQinsert(PQ, 6);
+    PQinsert(PQ, 7);
+    PQinsert(PQ, 8);
+    PQinsert(PQ, 9);
+    PQinsert(PQ, 10);
+    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->pq[i]);
+    printf("\n");
+    PQdelMax(PQ);
+    for (int i=1; i<=PQ->N; i++) printf("%d ", PQ->pq[i]);
+    printf("\n");
+
+    free(PQ->pq);
+    free(PQ->qp);
+    free(PQ);
+    return 0;
+}
